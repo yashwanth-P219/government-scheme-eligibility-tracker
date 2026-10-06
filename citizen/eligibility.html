@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Scheme Eligibility Checker – Citizen Portal</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-emblem">🏛️</div>
+            <div class="sidebar-title">
+                <h2>Welfare Portal</h2>
+                <span>Citizen Services</span>
+            </div>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar"><span id="userAvatarChar">U</span></div>
+            <div class="user-info">
+                <div class="user-name"><span id="navUserName">User</span></div>
+                <span class="user-role">CITIZEN</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Navigation</div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><span class="menu-icon">📊</span> Dashboard</a></li>
+                <li><a href="eligibility.html" class="active"><span class="menu-icon">🎯</span> Eligibility Checker</a></li>
+                <li><a href="schemes.html"><span class="menu-icon">📜</span> Welfare Schemes</a></li>
+                <li><a href="applications.html"><span class="menu-icon">📝</span> My Applications</a></li>
+                <li><a href="benefits.html"><span class="menu-icon">💰</span> Benefits & DBT</a></li>
+                <li><a href="profile.html"><span class="menu-icon">👤</span> My Profile</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button onclick="handleLogout()" class="btn btn-danger btn-sm" style="width: 100%;">🚪 Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle-btn">☰</button>
+                <h2 class="page-heading">Scheme Eligibility Assessment</h2>
+            </div>
+            <div class="topbar-right">
+                <a href="profile.html" class="btn btn-outline btn-sm">Update Saved Profile</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <!-- Eligibility Overview Card -->
+            <div class="card" style="background: #f8fafc; border-left: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 4px;">
+                            🏛️ Automated Scheme Eligibility Engine
+                        </h3>
+                        <p style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0;">
+                            Our automated verification system instantly evaluates your verified profile against official departmental guidelines, age thresholds, income slabs, and reservation policies.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--success);" id="eligibleCountDisplay">-</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Eligible Schemes</div>
+                        </div>
+                        <div style="font-size: 1.5rem; color: var(--border-dark);">/</div>
+                        <div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary-dark);" id="totalCountDisplay">-</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What-if Parameter Simulator Accordion -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Simulation & Profile Override (What-If Analysis)</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="runEligibilityCheck(false)">Show All Schemes</button>
+                        <button type="button" class="btn btn-success btn-sm" onclick="runEligibilityCheck(true)">Show Qualifying Only</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="evalAge">Test Age</label>
+                        <input type="number" id="evalAge" class="form-control" placeholder="Leave blank to use profile">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="evalIncome">Test Annual Income (₹)</label>
+                        <input type="number" id="evalIncome" class="form-control" placeholder="Leave blank to use profile">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="evalGender">Test Gender</label>
+                        <select id="evalGender" class="form-control">
+                            <option value="">Use Profile Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="evalCategory">Test Category</label>
+                        <select id="evalCategory" class="form-control">
+                            <option value="">Use Profile Category</option>
+                            <option value="General">General</option>
+                            <option value="OBC">OBC</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="EWS">EWS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="evalOccupation">Test Occupation</label>
+                        <select id="evalOccupation" class="form-control">
+                            <option value="">Use Profile Occupation</option>
+                            <option value="Student">Student</option>
+                            <option value="Farmer">Farmer</option>
+                            <option value="Artisan">Artisan</option>
+                            <option value="Self-Employed">Self-Employed</option>
+                            <option value="Unemployed">Unemployed</option>
+                            <option value="Retired">Retired</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="runEligibilityCheck(false)">
+                        🔄 Re-evaluate Scheme Eligibility
+                    </button>
+                </div>
+            </div>
+
+            <!-- Evaluated Schemes Results Grid -->
+            <div id="eligibilityResultsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+                <!-- Rendered dynamically by js/eligibility.js -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Apply Confirmation Modal -->
+<div id="applyModal" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 520px;">
+        <div class="modal-header">
+            <h3>📝 Apply for Welfare Scheme</h3>
+            <button type="button" class="modal-close" onclick="closeModal('applyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="applySchemeId">
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.75rem;">You qualify for this scheme. Confirm application submission for:</p>
+            <div style="background: #eff6ff; border-left: 4px solid var(--primary); padding: 0.85rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                <strong id="applySchemeName" style="color: var(--primary-dark); font-size: 1.1rem; display: block; margin-bottom: 4px;">-</strong>
+                <div style="font-size: 0.84rem; color: #475569;">
+                    Department: <span id="applyModalDept" style="font-weight: 600; color: var(--text-main);">-</span>
+                </div>
+                <div style="font-size: 0.84rem; color: #475569; margin-top: 2px;">
+                    Benefit: <span id="applyModalBenefit" style="font-weight: 600; color: #047857;">-</span>
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.84rem;">
+                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
+                    Applicant Dossier: <span id="applyModalCitizenName" style="color: var(--primary);">-</span>
+                </div>
+                <div id="applyModalCitizenDetails" style="color: var(--text-muted); line-height: 1.4;">-</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="applyRemarks">Statement of Purpose / Notes for Reviewing Officer</label>
+                <textarea id="applyRemarks" class="form-control" rows="3" placeholder="Optional notes for the reviewing officer..."></textarea>
+                <div class="form-help">Your demographic profile will be automatically linked to this application.</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('applyModal')">Cancel</button>
+            <button type="button" id="confirmApplyBtn" class="btn btn-primary" onclick="submitApplication()">Confirm & Submit Application</button>
+        </div>
+    </div>
+</div>
+
+<script src="../lib/sql-wasm.js"></script>
+<script src="../js/database.js"></script>
+<script src="../js/db-init.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/schemes.js"></script>
+<script src="../js/applications.js"></script>
+<script src="../js/eligibility.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireCitizen()) return;
+        await GovDB.initializeDatabase();
+        checkCitizenEligibility();
+    });
+</script>
+</body>
+</html>

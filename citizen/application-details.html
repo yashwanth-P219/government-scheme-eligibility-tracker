@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Dossier & Timeline – Citizen Portal</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-emblem">🏛️</div>
+            <div class="sidebar-title">
+                <h2>Welfare Portal</h2>
+                <span>Citizen Services</span>
+            </div>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar"><span id="userAvatarChar">U</span></div>
+            <div class="user-info">
+                <div class="user-name"><span id="navUserName">User</span></div>
+                <span class="user-role">CITIZEN</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Navigation</div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><span class="menu-icon">📊</span> Dashboard</a></li>
+                <li><a href="eligibility.html"><span class="menu-icon">🎯</span> Eligibility Checker</a></li>
+                <li><a href="schemes.html"><span class="menu-icon">📜</span> Welfare Schemes</a></li>
+                <li><a href="applications.html" class="active"><span class="menu-icon">📝</span> My Applications</a></li>
+                <li><a href="benefits.html"><span class="menu-icon">💰</span> Benefits & DBT</a></li>
+                <li><a href="profile.html"><span class="menu-icon">👤</span> My Profile</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button onclick="handleLogout()" class="btn btn-danger btn-sm" style="width: 100%;">🚪 Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle-btn">☰</button>
+                <h2 class="page-heading">Application Dossier Details</h2>
+            </div>
+            <div class="topbar-right">
+                <a href="applications.html" class="btn btn-secondary btn-sm">&larr; Back to Applications</a>
+            </div>
+        </header>
+
+        <main class="app-content" id="applicationDetailsContainer">
+            <!-- Header Dossier Card -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                            Application Dossier <span id="detailAppId">-</span>
+                        </div>
+                        <h2 id="detailSchemeName" style="color: var(--primary); font-size: 1.5rem; margin: 0.25rem 0;">-</h2>
+                        <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">
+                            🏛️ <span id="detailDepartment">-</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="detailStatusBadge" class="badge badge-pending" style="font-size: 0.95rem; padding: 6px 14px;">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                <!-- Timeline Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Status & Processing Timeline</h3>
+                    </div>
+                    <div id="timelineContainer">
+                        <!-- Rendered by renderTimeline() in js/applications.js -->
+                    </div>
+                </div>
+
+                <!-- Applicant & Scheme Details -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Benefit Card (if approved) -->
+                    <div id="detailBenefitCard" class="card" style="border-left: 5px solid var(--success); display: none;">
+                        <div class="card-header">
+                            <h3 style="color: var(--success);">Sanctioned Direct Benefit (DBT)</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <span class="text-muted" style="font-size: 0.8rem; display: block;">Disbursement Amount</span>
+                                <strong id="detailBenefitAmount" style="font-size: 1.3rem; color: var(--success);">-</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted" style="font-size: 0.8rem; display: block;">Payment Status</span>
+                                <strong id="detailBenefitStatus">-</strong>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.85rem;">
+                            <div><strong>Transaction Ref:</strong> <code id="detailTxnRef">-</code></div>
+                            <div><strong>Disbursement Date:</strong> <span id="detailDisburseDate">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Applicant Demographics as Stored -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Applicant Socioeconomic Dossier</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.88rem;">
+                            <div><span class="text-muted">Applicant Name:</span> <strong id="detailApplicantName">-</strong></div>
+                            <div><span class="text-muted">Email:</span> <span id="detailApplicantEmail">-</span></div>
+                            <div><span class="text-muted">Phone:</span> <span id="detailApplicantPhone">-</span></div>
+                            <div><span class="text-muted">Category:</span> <span id="detailApplicantCategory">-</span></div>
+                            <div><span class="text-muted">Annual Income:</span> <span id="detailApplicantIncome">-</span></div>
+                            <div><span class="text-muted">Education:</span> <span id="detailApplicantEducation">-</span></div>
+                            <div><span class="text-muted">Occupation:</span> <span id="detailApplicantOccupation">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Department Remarks Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Official Remarks & Adjudication Notes</h3>
+                        </div>
+                        <div id="detailRemarksBox" style="background: #f8fafc; border: 1px dashed var(--border-dark); border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">
+                            -
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="../lib/sql-wasm.js"></script>
+<script src="../js/database.js"></script>
+<script src="../js/db-init.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/applications.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireCitizen()) return;
+        await GovDB.initializeDatabase();
+        loadApplicationDetails();
+    });
+</script>
+</body>
+</html>

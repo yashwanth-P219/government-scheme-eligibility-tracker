@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Login – Smart Government Scheme Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body style="background-color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column;">
+
+    <!-- Top Bar -->
+    <div class="gov-tricolor-line"></div>
+    <div class="gov-topbar">
+        <div class="gov-topbar-brand">
+            <span>🇮🇳 Government Welfare Portal</span>
+        </div>
+        <div>
+            <a href="index.html" style="color: #cbd5e1; text-decoration: none;">&larr; Back to Public Portal</a>
+        </div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="container" style="max-width: 520px; margin: auto; padding: 2rem 1rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div class="gov-emblem" style="margin: 0 auto 1rem auto; width: 56px; height: 56px; font-size: 1.6rem;">🏛️</div>
+            <h2 style="font-size: 1.6rem; color: var(--primary);">Secure Welfare Portal Login</h2>
+            <p class="text-muted" style="font-size: 0.9rem;">Sign in to access your dashboard, check eligibility, and manage benefits.</p>
+            <span id="portalBadge" class="badge badge-approved" style="font-size: 0.8rem; padding: 4px 10px;">CITIZEN PORTAL</span>
+        </div>
+
+        <div class="card" style="padding: 2rem; box-shadow: var(--shadow-md);">
+            <!-- Role Selection Tabs -->
+            <div class="tabs-nav" style="justify-content: center; margin-bottom: 1.75rem;">
+                <button type="button" class="tab-btn login-role-tab active" data-role="CITIZEN">
+                    Citizen Login
+                </button>
+                <button type="button" class="tab-btn login-role-tab" data-role="OFFICER">
+                    Officer Login
+                </button>
+            </div>
+
+            <!-- Rapid Access Account Fill -->
+            <div style="background: #f8fafc; border: 1px dashed var(--border-dark); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                    ⚡ Quick Access Testing Accounts
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoAccount('CITIZEN')">
+                        Citizen Account (Rahul Sharma)
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoAccount('OFFICER')">
+                        Welfare Officer (Dr. Anand Verma)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <input type="hidden" id="loginRole" value="CITIZEN">
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Official Email Address <span class="required">*</span></label>
+                    <input type="email" id="email" class="form-control" placeholder="name@example.com" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                    <div class="form-help">Protected with SHA-256 encrypted citizen authentication.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">
+                    Sign In to Portal
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); font-size: 0.9rem;">
+                <span class="text-muted">New citizen without an account?</span>
+                <a href="register.html" style="font-weight: 600; color: var(--primary); margin-left: 4px; text-decoration: none;">Register Now</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
+            Official Citizen Welfare & Direct Benefit Transfer Portal &bull; Government of India
+        </div>
+    </div>
+
+    <script src="lib/sql-wasm.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/db-init.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await GovDB.initializeDatabase();
+            initLoginForm();
+        });
+    </script>
+</body>
+</html>

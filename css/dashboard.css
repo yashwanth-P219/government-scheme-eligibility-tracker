@@ -1,0 +1,466 @@
+/* ==============================================================================
+   SMART GOVERNMENT SCHEME ELIGIBILITY AND BENEFIT TRACKER
+   Dashboard Specific Styles (Sidebar, Layout, Metrics, Timelines, Charts)
+   ============================================================================== */
+
+/* Layout Shell */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f1f5f9;
+}
+
+/* Sidebar */
+.app-sidebar {
+    width: 260px;
+    background-color: var(--primary-dark);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    border-right: 1px solid #1e293b;
+    z-index: 100;
+}
+
+.sidebar-header {
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #1e293b;
+    background-color: #0b1120;
+}
+
+.sidebar-emblem {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), #b45309);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.sidebar-title h2 {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.sidebar-title span {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-user {
+    padding: 1.25rem;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #334155;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: 2px solid var(--accent);
+}
+
+.user-info {
+    overflow: hidden;
+}
+
+.user-info .user-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-info .user-role {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    display: inline-block;
+    background: #1e3a8a;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+}
+
+.nav-section-label {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+}
+
+.sidebar-menu {
+    list-style: none;
+    margin-bottom: 1rem;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.7rem 1.25rem;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu li a:hover {
+    color: #ffffff;
+    background-color: #1e293b;
+    border-left-color: var(--accent);
+}
+
+.sidebar-menu li a.active {
+    color: #ffffff;
+    background-color: #1e293b;
+    border-left-color: var(--accent);
+    font-weight: 600;
+}
+
+.sidebar-menu li a .menu-icon {
+    font-size: 1.15rem;
+    width: 22px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #1e293b;
+    background-color: #0b1120;
+}
+
+/* Main Content Area */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.app-topbar {
+    background: #ffffff;
+    height: 64px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.menu-toggle-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--text-main);
+}
+
+.page-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.app-content {
+    flex: 1;
+    padding: 1.75rem;
+    max-width: 1350px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Stats Metrics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.stat-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary);
+}
+
+.stat-card.stat-success::before { background: var(--success); }
+.stat-card.stat-warning::before { background: var(--warning); }
+.stat-card.stat-danger::before { background: var(--danger); }
+.stat-card.stat-info::before { background: var(--info); }
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.stat-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: #eff6ff;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1.1;
+    margin-bottom: 0.35rem;
+}
+
+.stat-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Progress Bars */
+.progress-bar-container {
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-bar-fill {
+    background-color: var(--primary);
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+}
+
+.progress-bar-fill.fill-success { background-color: var(--success); }
+.progress-bar-fill.fill-warning { background-color: var(--accent); }
+
+/* Application Status Timeline */
+.timeline-track {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1.5rem 0;
+}
+
+.timeline-track::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background-color: var(--border-dark);
+}
+
+.timeline-step {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-step:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 3px solid var(--border-dark);
+}
+
+.timeline-step.completed .timeline-dot {
+    background-color: var(--success);
+    border-color: var(--success-bg);
+}
+
+.timeline-step.active .timeline-dot {
+    background-color: var(--info);
+    border-color: var(--info-bg);
+}
+
+.timeline-step.rejected .timeline-dot {
+    background-color: var(--danger);
+    border-color: var(--danger-bg);
+}
+
+.timeline-content h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.timeline-content p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Custom SVG / Pure Vanilla JS Chart Containers */
+.chart-container {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-header h3 {
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+.chart-body {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+}
+
+/* Horizontal Bar Chart (Custom CSS/SVG) */
+.bar-chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    font-size: 0.85rem;
+}
+
+.bar-label {
+    width: 200px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 12px;
+}
+
+.bar-track {
+    flex: 1;
+    background-color: #f1f5f9;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 24px;
+}
+
+.bar-value {
+    width: 80px;
+    text-align: right;
+    font-weight: 700;
+    padding-left: 12px;
+    color: var(--primary-dark);
+}

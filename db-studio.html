@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Studio & SQL Console</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        .studio-container {
+            display: grid;
+            grid-template-columns: 290px 1fr;
+            min-height: calc(100vh - 42px);
+            background: #f8fafc;
+        }
+        .studio-sidebar {
+            background: #ffffff;
+            border-right: 1px solid var(--border-color);
+            padding: 1.25rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .studio-table-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .studio-table-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+        }
+        .studio-table-btn:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+        .studio-table-btn.active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        .studio-main {
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-x: auto;
+        }
+        .studio-tab-bar {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0;
+            margin-bottom: 1rem;
+        }
+        .studio-tab {
+            padding: 10px 18px;
+            border: none;
+            background: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s ease;
+        }
+        .studio-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .sql-editor-box {
+            width: 100%;
+            min-height: 140px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            resize: vertical;
+        }
+        .snippet-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-sm);
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            font-family: monospace;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .snippet-btn:hover {
+            background: #e2e8f0;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .sql-result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .sql-result-table th {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .sql-result-table td {
+            border: 1px solid #e2e8f0;
+            padding: 7px 12px;
+            color: #334155;
+        }
+        .sql-result-table tr:hover {
+            background: #f8fafc;
+        }
+        .ddl-box {
+            background: #0f172a;
+            color: #a5f3fc;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-family: 'Consolas', monospace;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 900px) {
+            .studio-container {
+                grid-template-columns: 1fr;
+            }
+            .studio-sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="studio-container">
+    <!-- Sidebar: Tables List -->
+    <aside class="studio-sidebar">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span style="font-size: 1.4rem;">🏛️</span>
+                <h3 style="font-size: 1.15rem; color: var(--primary-dark); margin: 0;">Database Studio</h3>
+            </div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;">
+                SQLite WebAssembly &bull; 8 Tables (3NF)
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+                <a href="index.html" class="btn btn-outline btn-sm" style="font-size: 0.74rem; padding: 3px 8px;">Home</a>
+                <a href="citizen/dashboard.html" class="btn btn-outline btn-sm" style="font-size: 0.74rem; padding: 3px 8px;">Citizen</a>
+                <a href="officer/dashboard.html" class="btn btn-outline btn-sm" style="font-size: 0.74rem; padding: 3px 8px;">Officer</a>
+            </div>
+            <input type="text" id="filterTablesInput" class="form-control" placeholder="Filter tables..." style="font-size: 0.82rem; padding: 6px 10px; margin-bottom: 10px;" oninput="filterTableList()">
+        </div>
+
+        <div style="flex: 1; overflow-y: auto;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">
+                Relational Tables (3NF)
+            </div>
+            <ul class="studio-table-list" id="studioTablesList">
+                <!-- Populated by JS -->
+            </ul>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <button onclick="GovDB.exportDatabase()" class="btn btn-outline btn-sm" style="width: 100%; justify-content: center; font-size: 0.78rem;">
+                💾 Download .sqlite File
+            </button>
+            <button onclick="resetDatabaseStudio()" class="btn btn-danger btn-sm" style="width: 100%; justify-content: center; font-size: 0.78rem;">
+                🔄 Re-seed Default Data
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="studio-main">
+        <!-- Top Banner -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.5rem; color: var(--primary-dark); margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
+                    <span id="selectedTableIcon">📊</span>
+                    <span id="selectedTableNameDisplay">Citizen</span>
+                </h1>
+                <p style="font-size: 0.86rem; color: var(--text-muted); margin: 0;" id="selectedTableMetaDisplay">
+                    Loading schema and records...
+                </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="refreshCurrentTable()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+                <button onclick="openInsertModal()" class="btn btn-primary btn-sm">+ Insert Row</button>
+            </div>
+        </div>
+
+        <!-- Studio Navigation Tabs -->
+        <div class="card" style="padding: 1.25rem;">
+            <div class="studio-tab-bar">
+                <button class="studio-tab active" onclick="switchStudioTab('data')">📋 Browse Records (<span id="tabRecordCount">0</span>)</button>
+                <button class="studio-tab" onclick="switchStudioTab('schema')">📐 Table Schema & DDL</button>
+                <button class="studio-tab" onclick="switchStudioTab('sql')">⚡ SQL Query Console</button>
+            </div>
+
+            <!-- Tab 1: Browse Records -->
+            <div id="tabDataContent">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="text" id="searchTableDataInput" class="form-control" placeholder="Search in table..." style="max-width: 260px; font-size: 0.84rem;" oninput="searchCurrentTableData()">
+                    </div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted);" id="tableDataStatusText">
+                        Showing all rows
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 480px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                    <table class="sql-result-table" id="tableDataGrid">
+                        <!-- Rendered by JS -->
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Schema & DDL -->
+            <div id="tabSchemaContent" style="display: none;">
+                <h4 style="font-size: 1rem; color: var(--primary-dark); margin-bottom: 10px;">Column Specifications & Integrity Constraints</h4>
+                <div class="table-responsive" style="margin-bottom: 1.5rem;">
+                    <table class="sql-result-table" id="tableSchemaGrid">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Column Name</th>
+                                <th>Data Type</th>
+                                <th>Nullable</th>
+                                <th>Default Value</th>
+                                <th>Primary Key</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableSchemaBody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4 style="font-size: 1rem; color: var(--primary-dark); margin-bottom: 10px;">Generated DDL Statement (Data Definition Language)</h4>
+                <pre class="ddl-box" id="tableDdlCode">-- Loading DDL...</pre>
+            </div>
+
+            <!-- Tab 3: Interactive SQL Query Console -->
+            <div id="tabSqlContent" style="display: none;">
+                <div style="margin-bottom: 12px;">
+                    <label class="form-label" style="font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Write or Paste SQL Statement (SELECT, INSERT, UPDATE, DELETE, ALTER, JOIN):</span>
+                        <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Press <strong>Ctrl + Enter</strong> to execute</span>
+                    </label>
+                    <textarea id="sqlConsoleInput" class="sql-editor-box" spellcheck="false" placeholder="SELECT * FROM Citizen LIMIT 10;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">Quick Snippets:</span>
+                        <button type="button" class="snippet-btn" onclick="setSnippet('SELECT * FROM Citizen LIMIT 10;')">Citizens</button>
+                        <button type="button" class="snippet-btn" onclick="setSnippet('SELECT s.Scheme_ID, s.Scheme_Name, d.Department_Name, s.Benefit_Type FROM Scheme s JOIN Department d ON s.Department_ID = d.Department_ID;')">Schemes + Dept</button>
+                        <button type="button" class="snippet-btn" onclick="setSnippet('SELECT Status, COUNT(*) AS Total FROM Application GROUP BY Status;')">App Status Count</button>
+                        <button type="button" class="snippet-btn" onclick="setSnippet('SELECT a.Application_ID, c.Name, s.Scheme_Name, a.Status, b.Benefit_Amount FROM Application a JOIN Citizen c ON a.Citizen_ID = c.Citizen_ID JOIN Scheme s ON a.Scheme_ID = s.Scheme_ID LEFT JOIN Approval ap ON a.Application_ID = ap.Application_ID LEFT JOIN Benefits b ON ap.Approval_ID = b.Approval_ID;')">Full Dossier Join</button>
+                        <button type="button" class="snippet-btn" onclick="setSnippet('UPDATE Scheme SET Status = 'Active' WHERE Status = 'Inactive';')">Update Status</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearSqlConsole()">Clear</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="executeCustomSql()">▶ Run SQL Query</button>
+                    </div>
+                </div>
+
+                <!-- SQL Output Results -->
+                <div id="sqlOutputContainer" style="display: none;">
+                    <div id="sqlExecutionNotice" style="margin-bottom: 10px; font-size: 0.85rem; font-weight: 500;"></div>
+                    <div class="table-responsive" style="max-height: 420px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                        <table class="sql-result-table" id="sqlResultGrid"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Insert Row Helper -->
+<div id="insertRowModal" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 580px;">
+        <div class="modal-header">
+            <h3>+ Insert Record into <span id="insertModalTableName">Table</span></h3>
+            <button type="button" class="modal-close" onclick="closeModal('insertRowModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="insertModalFieldsContainer">
+            <!-- Dynamically generated based on table schema -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('insertRowModal')">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="submitInsertRow()">Execute SQL INSERT</button>
+        </div>
+    </div>
+</div>
+
+<script src="lib/sql-wasm.js"></script>
+<script src="js/database.js"></script>
+<script src="js/db-init.js"></script>
+<script src="js/auth.js"></script>
+<script>
+    const ALL_TABLES = [
+        'Citizen', 'Department', 'Officer', 'Scheme', 
+        'Eligibility_Criteria', 'Application', 'Approval', 'Benefits'
+    ];
+
+    let currentTable = 'Citizen';
+    let currentTableRows = [];
+    let currentTableCols = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await GovDB.initializeDatabase();
+        renderTableList();
+        loadTable(currentTable);
+
+        // Bind Ctrl+Enter for SQL execution
+        document.getElementById('sqlConsoleInput').addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                executeCustomSql();
+            }
+        });
+    });
+
+    function renderTableList() {
+        const list = document.getElementById('studioTablesList');
+        list.innerHTML = ALL_TABLES.map(tbl => {
+            let count = 0;
+            try {
+                const res = GovDB.fetchOne(`SELECT COUNT(*) AS c FROM "${tbl}";`);
+                if (res) count = res.c;
+            } catch (e) {}
+
+            const activeClass = tbl === currentTable ? 'active' : '';
+            return `
+                <li>
+                    <button class="studio-table-btn ${activeClass}" onclick="loadTable('${tbl}')" id="tblBtn_${tbl}">
+                        <span>📄 ${tbl}</span>
+                        <span class="badge badge-dept" style="font-size: 0.72rem;">${count}</span>
+                    </button>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function filterTableList() {
+        const query = document.getElementById('filterTablesInput').value.toLowerCase().trim();
+        ALL_TABLES.forEach(tbl => {
+            const btn = document.getElementById(`tblBtn_${tbl}`)?.parentElement;
+            if (btn) {
+                btn.style.display = tbl.toLowerCase().includes(query) ? '' : 'none';
+            }
+        });
+    }
+
+    function switchStudioTab(tabName) {
+        document.querySelectorAll('.studio-tab').forEach(b => b.classList.remove('active'));
+        document.getElementById('tabDataContent').style.display = 'none';
+        document.getElementById('tabSchemaContent').style.display = 'none';
+        document.getElementById('tabSqlContent').style.display = 'none';
+
+        if (tabName === 'data') {
+            document.querySelectorAll('.studio-tab')[0].classList.add('active');
+            document.getElementById('tabDataContent').style.display = 'block';
+        } else if (tabName === 'schema') {
+            document.querySelectorAll('.studio-tab')[1].classList.add('active');
+            document.getElementById('tabSchemaContent').style.display = 'block';
+        } else if (tabName === 'sql') {
+            document.querySelectorAll('.studio-tab')[2].classList.add('active');
+            document.getElementById('tabSqlContent').style.display = 'block';
+            document.getElementById('sqlConsoleInput').focus();
+        }
+    }
+
+    function loadTable(tableName) {
+        currentTable = tableName;
+        document.querySelectorAll('.studio-table-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById(`tblBtn_${tableName}`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        document.getElementById('selectedTableNameDisplay').textContent = tableName;
+
+        refreshCurrentTable();
+    }
+
+    function refreshCurrentTable() {
+        try {
+            // 1. Fetch table rows
+            currentTableRows = GovDB.fetchAll(`SELECT * FROM "${currentTable}";`);
+            document.getElementById('tabRecordCount').textContent = currentTableRows.length;
+
+            // 2. Fetch schema info
+            const schemaCols = GovDB.fetchAll(`PRAGMA table_info("${currentTable}");`);
+            currentTableCols = schemaCols;
+
+            document.getElementById('selectedTableMetaDisplay').textContent = 
+                `${schemaCols.length} columns • ${currentTableRows.length} total records • Relational 3NF`;
+
+            renderTableData(currentTableRows, schemaCols);
+            renderTableSchema(schemaCols);
+            renderTableDdl();
+            renderTableList();
+
+            // Set default snippet in SQL tab for this table
+            document.getElementById('sqlConsoleInput').value = `SELECT * FROM ${currentTable};`;
+        } catch (err) {
+            console.error('Error loading table:', err);
+            showToast('Error loading table: ' + err.message, 'error');
+        }
+    }
+
+    function renderTableData(rows, cols) {
+        const grid = document.getElementById('tableDataGrid');
+        if (!cols || cols.length === 0) {
+            grid.innerHTML = '<tr><td class="empty-state">No columns found.</td></tr>';
+            return;
+        }
+
+        const colNames = cols.map(c => c.name);
+
+        let thead = '<thead><tr>';
+        colNames.forEach(col => {
+            thead += `<th>${col}</th>`;
+        });
+        thead += '<th>Actions</th></tr></thead>';
+
+        let tbody = '<tbody>';
+        if (rows.length === 0) {
+            tbody += `<tr><td colspan="${colNames.length + 1}" class="empty-state" style="text-align: center; padding: 2rem;">Table is empty (0 records).</td></tr>`;
+        } else {
+            rows.forEach(row => {
+                tbody += '<tr>';
+                colNames.forEach(col => {
+                    let val = row[col];
+                    if (val === null || val === undefined) {
+                        val = '<span style="color: #94a3b8; font-style: italic;">NULL</span>';
+                    } else if (typeof val === 'string' && val.length > 55) {
+                        val = `<span title="${val.replace(/"/g, '&quot;')}">${val.substring(0, 52)}...</span>`;
+                    }
+                    tbody += `<td>${val}</td>`;
+                });
+
+                // Primary key for delete
+                const pkCol = cols.find(c => c.pk === 1) || cols[0];
+                const pkVal = row[pkCol.name];
+
+                tbody += `
+                    <td style="white-space: nowrap;">
+                        <button class="btn btn-danger btn-sm" style="padding: 2px 7px; font-size: 0.72rem;" onclick="deleteRow('${currentTable}', '${pkCol.name}', '${pkVal}')">Delete</button>
+                    </td>
+                `;
+                tbody += '</tr>';
+            });
+        }
+        tbody += '</tbody>';
+
+        grid.innerHTML = thead + tbody;
+        document.getElementById('tableDataStatusText').textContent = `Showing all ${rows.length} rows`;
+    }
+
+    function searchCurrentTableData() {
+        const query = document.getElementById('searchTableDataInput').value.toLowerCase().trim();
+        if (!query) {
+            renderTableData(currentTableRows, currentTableCols);
+            return;
+        }
+
+        const filtered = currentTableRows.filter(row => {
+            return Object.values(row).some(v => v !== null && v !== undefined && String(v).toLowerCase().includes(query));
+        });
+
+        renderTableData(filtered, currentTableCols);
+        document.getElementById('tableDataStatusText').textContent = `Matched ${filtered.length} of ${currentTableRows.length} rows`;
+    }
+
+    function renderTableSchema(cols) {
+        const body = document.getElementById('tableSchemaBody');
+        body.innerHTML = cols.map(c => {
+            const isPk = c.pk === 1 ? '<span class="badge badge-approved" style="font-size: 0.72rem;">PRIMARY KEY</span>' : '<span style="color: #94a3b8;">No</span>';
+            const nullable = c.notnull === 0 ? 'YES' : '<strong>NO (NOT NULL)</strong>';
+            const defaultVal = c.dflt_value !== null ? `<code>${c.dflt_value}</code>` : '<span style="color: #94a3b8;">NULL</span>';
+
+            return `
+                <tr>
+                    <td><strong>${c.cid}</strong></td>
+                    <td><code>${c.name}</code></td>
+                    <td><span class="badge badge-dept" style="font-size: 0.74rem;">${c.type || 'TEXT'}</span></td>
+                    <td>${nullable}</td>
+                    <td>${defaultVal}</td>
+                    <td>${isPk}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function renderTableDdl() {
+        try {
+            const res = GovDB.fetchOne(`SELECT sql FROM sqlite_master WHERE type='table' AND name=?;`, [currentTable]);
+            const ddlBox = document.getElementById('tableDdlCode');
+            if (res && res.sql) {
+                ddlBox.textContent = res.sql + ';';
+            } else {
+                ddlBox.textContent = `-- DDL definition not found for ${currentTable}`;
+            }
+        } catch (e) {
+            document.getElementById('tableDdlCode').textContent = '-- Error: ' + e.message;
+        }
+    }
+
+    async function deleteRow(tableName, pkCol, pkVal) {
+        if (!confirm(`Are you sure you want to delete this record where ${pkCol} = '${pkVal}' from table '${tableName}'?`)) {
+            return;
+        }
+
+        try {
+            const sql = `DELETE FROM "${tableName}" WHERE "${pkCol}" = ?;`;
+            GovDB.executeQuery(sql, [pkVal]);
+            await GovDB.saveDatabase();
+            showToast(`Record deleted from ${tableName} successfully!`, 'success');
+            refreshCurrentTable();
+        } catch (err) {
+            console.error('Delete error:', err);
+            showToast('Delete failed: ' + err.message, 'error');
+        }
+    }
+
+    function setSnippet(sql) {
+        document.getElementById('sqlConsoleInput').value = sql;
+        executeCustomSql();
+    }
+
+    function clearSqlConsole() {
+        document.getElementById('sqlConsoleInput').value = '';
+        document.getElementById('sqlOutputContainer').style.display = 'none';
+    }
+
+    async function executeCustomSql() {
+        const query = document.getElementById('sqlConsoleInput').value.trim();
+        if (!query) {
+            showToast('Please enter an SQL query to execute.', 'warning');
+            return;
+        }
+
+        const notice = document.getElementById('sqlExecutionNotice');
+        const container = document.getElementById('sqlOutputContainer');
+        const grid = document.getElementById('sqlResultGrid');
+        container.style.display = 'block';
+
+        const startTime = performance.now();
+
+        try {
+            const isSelect = /^(SELECT|PRAGMA|EXPLAIN|WITH)/i.test(query.trim());
+
+            if (isSelect) {
+                const results = GovDB.fetchAll(query);
+                const elapsed = (performance.now() - startTime).toFixed(1);
+
+                notice.className = 'alert alert-info';
+                notice.innerHTML = `<strong>Query Executed:</strong> ${results.length} row(s) returned in ${elapsed} ms.`;
+
+                if (results.length === 0) {
+                    grid.innerHTML = '<tr><td class="empty-state" style="padding: 1.5rem; text-align: center;">Query returned 0 rows.</td></tr>';
+                    return;
+                }
+
+                const cols = Object.keys(results[0]);
+                let thead = '<thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead>';
+                let tbody = '<tbody>' + results.map(row => {
+                    return '<tr>' + cols.map(c => {
+                        let v = row[c];
+                        if (v === null || v === undefined) v = '<span style="color: #94a3b8; font-style: italic;">NULL</span>';
+                        return `<td>${v}</td>`;
+                    }).join('') + '</tr>';
+                }).join('') + '</tbody>';
+
+                grid.innerHTML = thead + tbody;
+            } else {
+                GovDB.executeQuery(query);
+                await GovDB.saveDatabase();
+                const elapsed = (performance.now() - startTime).toFixed(1);
+
+                notice.className = 'alert alert-success';
+                notice.innerHTML = `<strong>Success:</strong> SQL query executed successfully in ${elapsed} ms and saved to IndexedDB.`;
+                grid.innerHTML = '<tr><td style="padding: 1rem; color: #16a34a;">Transaction committed successfully.</td></tr>';
+
+                refreshCurrentTable();
+            }
+        } catch (err) {
+            console.error('SQL Execution Error:', err);
+            const elapsed = (performance.now() - startTime).toFixed(1);
+            notice.className = 'alert alert-danger';
+            notice.innerHTML = `<strong>SQL Error (${elapsed} ms):</strong> ${err.message}`;
+            grid.innerHTML = '';
+        }
+    }
+
+    function openInsertModal() {
+        document.getElementById('insertModalTableName').textContent = currentTable;
+        const container = document.getElementById('insertModalFieldsContainer');
+
+        let html = `<p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Enter column values to execute an <code>INSERT INTO ${currentTable}</code> statement:</p>`;
+
+        currentTableCols.forEach(col => {
+            const isPkAuto = col.pk === 1 && currentTable !== 'Department';
+            const placeholder = isPkAuto ? 'Auto-generated ID' : (col.dflt_value ? `Default: ${col.dflt_value}` : 'Enter value');
+            const disabled = isPkAuto ? 'disabled' : '';
+
+            html += `
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label class="form-label" style="font-size: 0.82rem; margin-bottom: 2px;">
+                        <strong>${col.name}</strong> 
+                        <span style="font-size: 0.74rem; color: var(--text-muted);">(${col.type || 'TEXT'}, ${col.notnull ? 'Required' : 'Optional'})</span>
+                    </label>
+                    <input type="text" class="form-control insert-field-input" data-col="${col.name}" placeholder="${placeholder}" ${disabled} style="font-size: 0.84rem; padding: 6px 10px;">
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        openModal('insertRowModal');
+    }
+
+    async function submitInsertRow() {
+        const inputs = document.querySelectorAll('.insert-field-input');
+        const record = {};
+
+        inputs.forEach(inp => {
+            if (inp.disabled) return;
+            const col = inp.dataset.col;
+            const val = inp.value.trim();
+            if (val !== '') {
+                record[col] = val;
+            }
+        });
+
+        if (Object.keys(record).length === 0) {
+            showToast('Please provide at least one column value.', 'warning');
+            return;
+        }
+
+        try {
+            await GovDB.insertRecord(currentTable, record);
+            closeModal('insertRowModal');
+            showToast(`Row inserted into ${currentTable} successfully!`, 'success');
+            refreshCurrentTable();
+        } catch (err) {
+            console.error('Insert error:', err);
+            showToast('Insert failed: ' + err.message, 'error');
+        }
+    }
+
+    async function resetDatabaseStudio() {
+        if (confirm('Are you sure you want to reset all 8 tables to the default seed data? Any custom rows will be replaced.')) {
+            await GovDB.resetDemoData();
+            refreshCurrentTable();
+            showToast('Database reset to default data successfully!', 'success');
+        }
+    }
+</script>
+</body>
+</html>
