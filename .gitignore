@@ -4,5 +4,6 @@
 *.db
 *.sqlite
 sqlite3.exe
+Zero
 __pycache__/
 *.py[cod]
