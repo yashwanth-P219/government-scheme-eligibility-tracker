@@ -122,23 +122,8 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
         query = urllib.parse.parse_qs(url.query)
         q = {k: v[0] for k, v in query.items()}
 
-        # Map .php to .html or handle APIs
-        if path.startswith("/api/") or path.startswith("/php/"):
+        if path.startswith("/api/"):
             return self.handle_api_get(path, q)
-
-        # Redirect PHP pages to their HTML versions for static serving
-        if path.endswith(".php"):
-            html_path = path[:-4] + ".html"
-            local_html_file = os.path.join(BASE_DIR, html_path.lstrip("/"))
-            if os.path.exists(local_html_file):
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                with open(local_html_file, "rb") as f:
-                    content = f.read()
-                self.send_header("Content-Length", str(len(content)))
-                self.end_headers()
-                self.wfile.write(content)
-                return
 
         # Default static file handling
         return super().do_GET()
@@ -158,12 +143,12 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
 
         try:
             # 1. Departments list
-            if path in ["/api/departments/list", "/php/departments/list.php"]:
+            if path == "/api/departments/list":
                 cur = db.execute("SELECT Department_ID, Department_Name, Description FROM Department ORDER BY Department_ID ASC")
                 return self.send_json(True, [dict(r) for r in cur.fetchall()], "Departments loaded.")
 
             # 2. Schemes list
-            elif path in ["/api/schemes/list", "/php/schemes/list.php"]:
+            elif path == "/api/schemes/list":
                 cit_id = session['id'] if (session and session['role'] == 'CITIZEN') else None
                 status = q.get('status', '')
                 if not (session and session['role'] == 'OFFICER') and status != 'all':
@@ -214,7 +199,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, schemes, "Schemes retrieved.")
 
             # 3. Scheme get details
-            elif path in ["/api/schemes/get", "/php/schemes/get.php"]:
+            elif path == "/api/schemes/get":
                 scheme_id = int(q.get('id', 0))
                 sql = """
                     SELECT s.*, d.Department_Name, e.Criteria_ID, e.Min_Age, e.Max_Age, e.Income_Limit,
@@ -231,7 +216,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, dict(row), "Scheme details retrieved.")
 
             # 4. Citizen Profile
-            elif path in ["/api/citizen/profile", "/php/citizen/profile.php"]:
+            elif path == "/api/citizen/profile":
                 if not session or session['role'] != 'CITIZEN':
                     return self.send_json(False, None, "Citizen authentication required.", 401)
                 row = db.execute("SELECT * FROM Citizen WHERE Citizen_ID = ?", (session['id'],)).fetchone()
@@ -245,7 +230,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, p, "Profile retrieved.")
 
             # 5. Eligibility Evaluation Engine
-            elif path in ["/api/eligibility/check", "/php/eligibility/check.php"]:
+            elif path == "/api/eligibility/check":
                 cit_id = session['id'] if (session and session['role'] == 'CITIZEN') else None
                 profile = {}
                 if cit_id:
@@ -340,7 +325,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 }, "Eligibility evaluation completed.")
 
             # 6. Applications List
-            elif path in ["/api/applications/list", "/php/applications/list.php"]:
+            elif path == "/api/applications/list":
                 if not session:
                     return self.send_json(False, None, "Authentication required.", 401)
 
@@ -385,7 +370,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, [dict(r) for r in cur.fetchall()], "Applications loaded.")
 
             # 7. Application Details Dossier
-            elif path in ["/api/applications/get", "/php/applications/get.php"]:
+            elif path == "/api/applications/get":
                 app_id = int(q.get('id', 0))
                 sql = """
                     SELECT 
@@ -418,7 +403,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, dict(row), "Application details retrieved.")
 
             # 8. Benefits Ledger
-            elif path in ["/api/benefits/list", "/php/benefits/list.php"]:
+            elif path == "/api/benefits/list":
                 if not session:
                     return self.send_json(False, None, "Authentication required.", 401)
                 
@@ -461,7 +446,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 }, "Benefits ledger loaded.")
 
             # 9. Dashboard Statistics
-            elif path in ["/api/reports/dashboard", "/php/reports/dashboard.php"]:
+            elif path == "/api/reports/dashboard":
                 if not session:
                     return self.send_json(False, None, "Authentication required.", 401)
 
@@ -552,7 +537,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                     }, "Citizen metrics loaded.")
 
             # 10. Application SQL Reports
-            elif path in ["/api/reports/applications", "/php/reports/applications.php"]:
+            elif path == "/api/reports/applications":
                 r1 = db.execute("""
                     SELECT s.Scheme_ID, s.Scheme_Name, d.Department_Name, COUNT(a.Application_ID) AS Total_Applications
                     FROM Scheme s
@@ -609,7 +594,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 }, "Application reports generated via SQL.")
 
             # 11. Financial & Demographic SQL Reports
-            elif path in ["/api/reports/benefits", "/php/reports/benefits.php"]:
+            elif path == "/api/reports/benefits":
                 r4 = db.execute("""
                     SELECT s.Scheme_ID, s.Scheme_Name, d.Department_Name,
                            COUNT(b.Benefit_ID) AS Beneficiary_Count,
@@ -664,7 +649,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
 
         try:
             # 1. Login
-            if path in ["/api/auth/login", "/php/auth/login.php"]:
+            if path == "/api/auth/login":
                 email = data.get('email', '').strip()
                 password = data.get('password', '').strip()
                 role = data.get('role', 'CITIZEN').upper()
@@ -719,7 +704,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(False, None, "Invalid email address or password.", 401)
 
             # 2. Register Citizen
-            elif path in ["/api/auth/register", "/php/auth/register.php"]:
+            elif path == "/api/auth/register":
                 email = data.get('email', '').strip()
                 name = data.get('name', '').strip()
                 password = data.get('password', '').strip()
@@ -760,7 +745,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, {"citizen_id": new_id, "token": token, "redirect": "citizen/dashboard.html"}, "Citizen registered successfully!", 201, extra_headers={"Set-Cookie": cookie})
 
             # 3. Logout
-            elif path in ["/api/auth/logout", "/php/auth/logout.php"]:
+            elif path == "/api/auth/logout":
                 _, token = self.get_session()
                 if token and token in SESSIONS:
                     del SESSIONS[token]
@@ -768,7 +753,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, {"redirect": "login.html"}, "Logged out successfully.", extra_headers={"Set-Cookie": cookie})
 
             # 4. Update Citizen Profile
-            elif path in ["/api/citizen/update-profile", "/php/citizen/update-profile.php"]:
+            elif path == "/api/citizen/update-profile":
                 if not session or session['role'] != 'CITIZEN':
                     return self.send_json(False, None, "Citizen authentication required.", 401)
 
@@ -792,7 +777,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, None, "Profile successfully updated in database!")
 
             # 5. Apply for Scheme
-            elif path in ["/api/applications/apply", "/php/applications/apply.php"]:
+            elif path == "/api/applications/apply":
                 if not session or session['role'] != 'CITIZEN':
                     return self.send_json(False, None, "Citizen authentication required.", 401)
 
@@ -811,7 +796,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, {"application_id": app_id}, "Application registered successfully!", 201)
 
             # 6. ACID Transaction: Approve Application & Sanction Benefit
-            elif path in ["/api/approvals/approve", "/php/approvals/approve.php"]:
+            elif path == "/api/approvals/approve":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -858,7 +843,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                     return self.send_json(False, None, f"Transaction aborted and rolled back: {str(ex)}", 500)
 
             # 7. Reject Application
-            elif path in ["/api/approvals/reject", "/php/approvals/reject.php"]:
+            elif path == "/api/approvals/reject":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -880,7 +865,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                     return self.send_json(False, None, f"Error rejecting application: {str(ex)}", 500)
 
             # 8. Mark Under Review
-            elif path in ["/api/approvals/under-review", "/php/approvals/under-review.php"]:
+            elif path == "/api/approvals/under-review":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -890,7 +875,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, None, f"Application #{app_id} marked Under Review.")
 
             # 9. Create Scheme (Transaction)
-            elif path in ["/api/schemes/create", "/php/schemes/create.php"]:
+            elif path == "/api/schemes/create":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -932,7 +917,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                     return self.send_json(False, None, f"Failed to create scheme: {str(ex)}", 500)
 
             # 10. Update Scheme
-            elif path in ["/api/schemes/update", "/php/schemes/update.php"]:
+            elif path == "/api/schemes/update":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -979,7 +964,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                     return self.send_json(False, None, f"Update failed: {str(ex)}", 500)
 
             # 11. Toggle Scheme Status
-            elif path in ["/api/schemes/deactivate", "/php/schemes/deactivate.php"]:
+            elif path == "/api/schemes/deactivate":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
@@ -994,7 +979,7 @@ class SchemeTrackerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json(True, {"new_status": status}, f"Status changed to {status}.")
 
             # 12. Update Benefit Status
-            elif path in ["/api/benefits/update-status", "/php/benefits/update-status.php"]:
+            elif path == "/api/benefits/update-status":
                 if not session or session['role'] != 'OFFICER':
                     return self.send_json(False, None, "Officer authorization required.", 403)
 
